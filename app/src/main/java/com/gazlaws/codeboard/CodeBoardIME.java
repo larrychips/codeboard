@@ -2,6 +2,7 @@ package com.gazlaws.codeboard;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -25,6 +26,8 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.Window;
+import android.view.WindowManager;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -75,6 +78,44 @@ public class CodeBoardIME extends InputMethodService
     private KeyboardUiFactory mKeyboardUiFactory = null;
     private KeyboardLayoutView mCurrentKeyboardLayoutView = null;
     private boolean longPressedSpaceButton = false;
+
+
+    private void logStructure(String where) {
+        // Log the identities of some objects in case they are actually the same.
+        Dialog        dialog              = getWindow();
+        Window        window              = dialog.getWindow();
+        WindowManager windowWindowManager = null;
+        Window        parentWindow        = null;
+        WindowManager parentWindowManager = null;
+        if ( window != null ) {
+            windowWindowManager = window.getWindowManager();
+            parentWindow        = window.getContainer();
+        }
+        if ( parentWindow != null ) {
+            parentWindowManager = parentWindow.getWindowManager();
+        }
+
+        int dialogId              = System.identityHashCode(dialog);
+        int windowId              = System.identityHashCode(window);
+        int windowWindowManagerId =
+            System.identityHashCode(windowWindowManager);
+        int parentWindowId        = System.identityHashCode(parentWindow);
+        int parentWindowManagerId =
+            System.identityHashCode(parentWindowManager);
+        int viewId                =
+            System.identityHashCode(mCurrentKeyboardLayoutView);
+
+        Log.d(
+                getClass().getSimpleName(),
+                "logStructure (from " + where + "): "
+                + "\n  dialog                " + dialogId
+                + "\n  window                " + windowId
+                + "\n  parent window         " + parentWindowId
+                + "\n  window manager        " + windowWindowManagerId
+                + "\n  parent window manager " + parentWindowManagerId
+                + "\n  keyboard layout view  " + viewId
+             );
+    }
 
     @Override
     public void onKey(int primaryCode, int[] KeyCodes) {
@@ -593,6 +634,9 @@ public class CodeBoardIME extends InputMethodService
 
             Collection<Key> keyboardLayout = builder.build();
             mCurrentKeyboardLayoutView = mKeyboardUiFactory.createKeyboardView(this, keyboardLayout);
+
+            logStructure("onCreateInputView");
+
             return mCurrentKeyboardLayoutView;
 
         } catch (KeyboardLayoutException e) {
