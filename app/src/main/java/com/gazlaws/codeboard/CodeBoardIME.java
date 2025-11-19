@@ -27,7 +27,9 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -82,38 +84,48 @@ public class CodeBoardIME extends InputMethodService
 
     private void logStructure(String where) {
         // Log the identities of some objects in case they are actually the same.
-        Dialog        dialog              = getWindow();
-        Window        window              = dialog.getWindow();
-        WindowManager windowWindowManager = null;
-        Window        parentWindow        = null;
-        WindowManager parentWindowManager = null;
+        Dialog        dialog        = getWindow();
+        Window        window        = dialog.getWindow();
+        WindowManager windowManager = null;
+        WindowMetrics windowMetrics = null;
+        WindowInsets  windowInsets  = null;
+        android.graphics.Insets insets = null;
+
         if ( window != null ) {
-            windowWindowManager = window.getWindowManager();
-            parentWindow        = window.getContainer();
+            windowManager = window.getWindowManager();
         }
-        if ( parentWindow != null ) {
-            parentWindowManager = parentWindow.getWindowManager();
+        if ( windowManager != null ) {
+            windowMetrics = windowManager.getCurrentWindowMetrics();
+        }
+        if ( windowMetrics != null ) {
+            windowInsets = windowMetrics.getWindowInsets();
+            insets = windowInsets.getInsets(
+                    WindowInsets.Type.systemBars()
+                    & ~WindowInsets.Type.ime()
+                    );
         }
 
-        int dialogId              = System.identityHashCode(dialog);
-        int windowId              = System.identityHashCode(window);
-        int windowWindowManagerId =
-            System.identityHashCode(windowWindowManager);
-        int parentWindowId        = System.identityHashCode(parentWindow);
-        int parentWindowManagerId =
-            System.identityHashCode(parentWindowManager);
-        int viewId                =
-            System.identityHashCode(mCurrentKeyboardLayoutView);
+        int dialogId        = System.identityHashCode( dialog );
+        int windowId        = System.identityHashCode( window );
+        int windowManagerId = System.identityHashCode( windowManager );
+        int windowMetricsId = System.identityHashCode( windowMetrics );
+        int viewId          =
+            System.identityHashCode( mCurrentKeyboardLayoutView );
+
 
         Log.d(
                 getClass().getSimpleName(),
                 "logStructure (from " + where + "): "
                 + "\n  dialog                " + dialogId
                 + "\n  window                " + windowId
-                + "\n  parent window         " + parentWindowId
-                + "\n  window manager        " + windowWindowManagerId
-                + "\n  parent window manager " + parentWindowManagerId
+                + "\n  window manager        " + windowManagerId
+                + "\n  window metrics        " + windowMetricsId
                 + "\n  keyboard layout view  " + viewId
+                + "\n"
+                + "\n  insets: left   " + insets.left
+                + "\n          right  " + insets.right
+                + "\n          bottom " + insets.bottom
+                + "\n          top    " + insets.top
              );
     }
 
