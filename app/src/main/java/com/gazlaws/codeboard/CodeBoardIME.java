@@ -25,6 +25,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.WindowInsets;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
@@ -75,6 +76,26 @@ public class CodeBoardIME extends InputMethodService
     private KeyboardUiFactory mKeyboardUiFactory = null;
     private KeyboardLayoutView mCurrentKeyboardLayoutView = null;
     private boolean longPressedSpaceButton = false;
+
+    private void adjustLayout() {
+        if ( Build.VERSION.SDK_INT == 35 ) {
+            WindowInsets windowInsets =
+                getWindow().getWindow()
+                .getWindowManager()
+                .getCurrentWindowMetrics()
+                .getWindowInsets();
+
+            android.graphics.Insets insets = windowInsets.getInsets(
+                    WindowInsets.Type.systemBars()
+                    & ~WindowInsets.Type.ime()
+                    );
+
+            mCurrentKeyboardLayoutView.setWidthReduction(insets.left);
+            mCurrentKeyboardLayoutView.setPadding(
+                    0, 0, insets.right, insets.bottom
+                    );
+        }
+    }
 
     @Override
     public void onKey(int primaryCode, int[] KeyCodes) {
@@ -593,6 +614,7 @@ public class CodeBoardIME extends InputMethodService
 
             Collection<Key> keyboardLayout = builder.build();
             mCurrentKeyboardLayoutView = mKeyboardUiFactory.createKeyboardView(this, keyboardLayout);
+            adjustLayout();
             return mCurrentKeyboardLayoutView;
 
         } catch (KeyboardLayoutException e) {

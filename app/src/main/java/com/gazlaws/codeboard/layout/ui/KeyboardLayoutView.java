@@ -14,10 +14,16 @@ public class KeyboardLayoutView extends ViewGroup {
 
     private final UiTheme uiTheme;
 
+    private int widthReduction = 0;
+
     public KeyboardLayoutView(Context context, UiTheme uiTheme) {
         super(context);
         setBackgroundColor(uiTheme.backgroundColor);
         this.uiTheme = uiTheme;
+    }
+
+    public void setWidthReduction(int reduction) {
+        widthReduction = reduction;
     }
 
     @Override
@@ -26,7 +32,7 @@ public class KeyboardLayoutView extends ViewGroup {
         DisplayMetrics metrics = getContext().getResources().getDisplayMetrics();
 
         int availableHeight = metrics.heightPixels;
-        int availableWidth = metrics.widthPixels;
+        int availableWidth = metrics.widthPixels - widthReduction;
 
         float keyboardSize = availableHeight > availableWidth
                 ? uiTheme.portraitSize
@@ -40,7 +46,11 @@ public class KeyboardLayoutView extends ViewGroup {
         final int count = getChildCount();
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
-            child.layout(l,t,r,b);
+            child.layout(
+                    l + getPaddingLeft(),
+                    t + getPaddingTop(),
+                    r - getPaddingRight(),
+                    b - getPaddingBottom());
         }
     }
 
