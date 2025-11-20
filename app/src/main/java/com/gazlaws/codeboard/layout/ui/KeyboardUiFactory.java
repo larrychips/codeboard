@@ -31,7 +31,6 @@ public class KeyboardUiFactory {
             View view = createKeyView(context, key, uiTheme);
             layout.addView(view,params);
         }
-        layout.setFitsSystemWindows(true);
         return layout;
     }
 
